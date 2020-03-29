@@ -26,12 +26,17 @@ logger.debug('RadarSync Version {}'.format(VER))
 #Sync with normal server
 radarr_url = os.environ['RADARR_URL']
 radarr_key = os.environ['RADARR_KEY']
+target_source_profiles = os.environ[TARGET_SOURCE_PROFILES]
 radarrSession = requests.Session()
 radarrSession.trust_env = False
 radarrMovies = radarrSession.get('{0}/api/movie?apikey={1}'.format(radarr_url, radarr_key))
 if radarrMovies.status_code != 200:
     logger.error('Radarr server error - response {}'.format(radarrMovies.status_code))
     sys.exit(0)
+
+#filter radarrMovies by target profile list if argument is passed 
+if target_profile:
+    radarrMovies = [movie for movie in radarrMovies.json() if movie['profileId'] in target_source_profiles]
 
 #Sync with 4k server
 logger.debug('syncing with 4k server')
